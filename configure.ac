@@ -90,5 +90,6 @@ fi
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile
+                 config.ml
                  virt-similarity.spec])
 AC_OUTPUT

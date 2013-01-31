@@ -29,6 +29,7 @@ Makefile
 /ltmain.sh
 /missing
 /stamp-h1
+/virt-similarity
 /virt-similarity.1
 /virt-similarity.spec
 /virt-similarity-*.tar.gz

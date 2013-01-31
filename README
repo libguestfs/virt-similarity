@@ -1,0 +1,76 @@
+virt-similarity: Find clusters of similar/cloned virtual machines
+Copyright (C) 2013 Red Hat Inc.
+======================================================================
+
+Compiling from source
+---------------------
+
+If checking out from git, then:
+  autoreconf -i
+
+Build it:
+  ./configure
+  make
+
+Optionally:
+  sudo make install
+
+Requirements
+------------
+
+- ocaml >= 3.12.0
+- ocaml findlib
+- libguestfs >= 1.14
+- ocaml libguestfs bindings
+
+Developers
+----------
+
+The upstream git repo is:
+
+http://git.annexia.org/?p=virt-similarity.git;a=summary
+
+Please send patches to the virt-tools mailing list:
+
+http://www.redhat.com/mailman/listinfo/virt-tools-list
+
+Notes on the technique used
+---------------------------
+
+(1) We use libguestfs to open each disk image.  This allows us to get
+at the raw data, in case the disk image is stored in some format like
+qcow2 or vmdk.  Also you could extend this program so it could
+understand encrypted disks.
+
+http://libguestfs.org/
+http://libguestfs.org/guestfs-java.3.html
+
+(2) For each disk, we split it into 64K blocks and hash each block.
+The reason for choosing 64K blocks is that it's the normal cluster
+size for qcow2, and the block size used by qemu-img etc.  The reason
+for doing the hashing is so that we can compare the disk images for
+similarity by holding the complete set of hashes in memory.  The
+hashing reduces each disk by a factor of 4096 (MD5) or 2048 (SHA-256)
+times, so for example a 10 GB disk image is reduced to a more
+manageable 2.5 or 5 MB.
+
+NB: For speed the hashes are saved in a cache file called
+'similarity-cache' in the local directory.  You can just delete this
+file when done.
+
+(3) We then compare each disk image, block by block, and record the
+difference between each pair of images.
+
+Note that we DON'T do advanced Cluster Analysis on the disk images.
+There's not any point since the rebasing operation used by qemu-img
+can only handle simple differences at the block level; it cannot, for
+example, move blocks around or do fuzzy matches.
+http://en.wikipedia.org/wiki/Cluster_analysis
+
+(4) We then output a tree (technically a 'Cladogram') showing a
+hierarchy of guests, using a simple hierarchical clustering algorithm,
+where we group the two closest guests, then that group with the next
+closest guest, and so forth.
+
+http://en.wikipedia.org/wiki/Cladogram
+http://en.wikipedia.org/wiki/Hierarchical_clustering

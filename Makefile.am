@@ -20,25 +20,44 @@ ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = \
 	COPYING \
 	README \
+	config.ml.in \
 	virt-similarity.spec \
 	virt-similarity.spec.in \
 	$(SOURCES)
 
 CLEANFILES = *~ *.cmi *.cmo *.cmx *.cma *.cmxa virt-similarity
 
+OCAMLPACKAGES = -package unix,guestfs
+OCAMLCFLAGS = -g -warn-error CDEFLMPSUVYZX $(OCAMLPACKAGES)
+OCAMLOPTFLAGS = $(OCAMLCFLAGS)
+
 # Sources in alphabetical order.
 SOURCES = \
-	similarity.ml
+	cache.mli \
+	cache.ml \
+	cladogram.mli \
+	cladogram.ml \
+	config.ml \
+	hash.ml \
+	similarity.ml \
+	utils.ml
 
 # Objects in build order.
 OBJECTS = \
+	config.cmo \
+	utils.cmo \
+	hash.cmo \
+	cache.cmo \
+	cladogram.cmo \
 	similarity.cmo
 
-XOBJECTS = $(OBJECTS:.=cmo=.cmx)
+XOBJECTS = $(OBJECTS:.cmo=.cmx)
+
+bin_SCRIPTS = virt-similarity
 
 if HAVE_OCAMLOPT
 virt-similarity: $(XOBJECTS)
-	$(OCAMLFIND) opt $(OCAMLCFLAGS) \
+	$(OCAMLFIND) opt $(OCAMLOPTFLAGS) \
 	  -linkpkg $(XOBJECTS) -o $@
 else
 virt-similarity: $(OBJECTS)
