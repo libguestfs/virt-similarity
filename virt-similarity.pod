@@ -6,31 +6,65 @@ virt-similarity - Find clusters of similar/cloned virtual machines
 
 =head1 SYNOPSIS
 
-
+ virt-similarity disk1 disk2 [disk3 ...]
 
 =head1 DESCRIPTION
 
-Virt-similiarity is a tool for doing cluster analysis of groups of
+Virt-similarity is a tool for doing cluster analysis of groups of
 virtual machines.  It can automatically detect machines which have
 been cloned from each other.  It can produce a "cladogram" showing the
 "family history" of each guest, or you can use it to create the most
 efficient tree of backing files which will use the least disk space.
 
+Basic usage is simply to run virt-similarity with a list of disk
+images.  It will read and analyze the disk images, then print a
+cladogram showing how they are related:
 
+ $ virt-similarity winxp-copy.img winxp-copy2.img \
+     f19rawhidex32.img f19rawhidex64.img archlinux20121201x64.img \
+     winxp.img winxp-copy2b.img
+ 
+ ---+------+------+------+------+------ winxp-copy2.img
+    |      |      |      |      |   
+    |      |      |      |      +------ winxp-copy2b.img
+    |      |      |      |          
+    |      |      |      +------+------ winxp.img
+    |      |      |             |   
+    |      |      |             +------ winxp-copy.img
+    |      |      |                 
+    |      |      +------ f19rawhidex64.img
+    |      |          
+    |      +------ f19rawhidex32.img
+    |          
+    +------ archlinux20121201x64.img
 
-
+The first time you run virt-similarity, it has to read the disk images
+which takes some time.  On subsequent runs, the information from each
+disk image is cached in a special form in a hidden file in your home
+directory called C<~/.similarity-cache.v1>.  You can simply delete
+this cache file at any time if you want, especially if you want to
+force virt-similarity to re-read the disk images.
 
 =head1 FILES
 
+=over 4
 
+=item C<~/.similarity-cache.v1>
+
+The cache file where virt-similarity saves information about each disk
+image so that it doesn't have to re-read them each time it is run.
+You can delete this file at any time.
+
+=back
 
 =head1 ENVIRONMENT VARIABLES
 
-
+Virt-similarity uses libguestfs, and is affected by various libguestfs
+environment variables.  See L<guestfs(3)/ENVIRONMENT VARIABLES>.
 
 =head1 SEE ALSO
 
-
+L<guestfs(3)>, L<http://virt-tools.org/>
 
 =head1 AUTHOR
 

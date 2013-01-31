@@ -21,6 +21,8 @@ EXTRA_DIST = \
 	COPYING \
 	README \
 	config.ml.in \
+	.depend \
+	virt-similarity.pod \
 	virt-similarity.spec \
 	virt-similarity.spec.in \
 	$(SOURCES)

@@ -32,7 +32,7 @@ let ( *^ ) = Int64.mul
 let (/^)   = Int64.div
 
 (* Read command line parameters. *)
-let n, filenames =
+let n, filenames, debug =
   let display_version () =
     printf "%s %s (%s)\n"
       Config.package_name Config.package_version
@@ -40,7 +40,11 @@ let n, filenames =
     exit 0
   in
 
+  let debug = ref false in
+
   let argspec = Arg.align [
+    "--debug", Arg.Set debug, " Enable debugging";
+    "-d", Arg.Set debug, " Enable debugging";
     "--version", Arg.Unit display_version, " Display version number and exit";
     "-V", Arg.Unit display_version, " Display version number and exit";
   ] in
@@ -75,7 +79,9 @@ Options:
     exit 1
   );
 
-  n, filenames
+  let debug = !debug in
+
+  n, filenames, debug
 
 (* Read in the cache file. *)
 let cache = Cache.read_cache_file ()
@@ -110,13 +116,15 @@ let cache =
       let cache, hashes =
         match Cache.get_hash cache filename with
         | Some hashes ->
-          printf "%s: disk image is already in the cache\n" filename;
+          if debug then
+            printf "%s: disk image is already in the cache\n%!" filename;
           cache, hashes
         | None ->
           printf "%s: reading disk image ...\n%!" filename;
           let hashes = read_disk_image filename in
           Cache.update_hash cache filename hashes, hashes in
-      printf "%s: number of blocks = %d\n" filename (Array.length hashes);
+      if debug then
+        printf "%s: number of blocks = %d\n" filename (Array.length hashes);
       cache
   ) cache (Array.to_list filenames)
 
@@ -154,7 +162,8 @@ let matrix =
       match hi, hj with
       | Some hi, Some hj ->
         let d = calculate_distance hi hj in
-        printf "distance from %s to %s = %d\n" filenames.(i) filenames.(j) d;
+        if debug then
+          printf "distance from %s to %s = %d\n" filenames.(i) filenames.(j) d;
         matrix.(i).(j) <- d;
         matrix.(j).(i) <- d
       | _ -> assert false
@@ -162,73 +171,7 @@ let matrix =
   matrix
 
 (* Construct the tree (cladogram). *)
-let cladogram =
-  (* At the bottom level, every disk image is in its own leaf. *)
-  let leaves =
-    let rec loop i = if i < n then Leaf i :: loop (i+1) else [] in
-    loop 0 in
-
-  (* Find the closest subtrees and combine them. *)
-  let rec combine_closest_subtrees trees =
-    let trees = Array.of_list trees in
-    let n = Array.length trees in
-
-    (* Find the minimum distance between any two subtrees. *)
-    let min_distance = ref max_int in
-    List.iter (
-      fun (i, j) ->
-        let d = min_distance_between_subtrees trees.(i) trees.(j) in
-        if d < !min_distance then min_distance := d
-    ) (pairs_of_ints n);
-
-    let min_distance = !min_distance in
-
-    (* For each subtree that differs from another by exactly the
-     * minimum distance, group them together into a single subtree.
-     *)
-    let in_group = Array.make n false in
-    List.iter (
-      fun (i, j) ->
-        let d = min_distance_between_subtrees trees.(i) trees.(j) in
-        if d = min_distance then (
-          in_group.(i) <- true;
-          in_group.(j) <- true
-        )
-    ) (pairs_of_ints n);
-
-    let group = ref [] and rest = ref [] in
-    Array.iteri (
-      fun i in_group ->
-        if in_group then
-          group := trees.(i) :: !group
-        else
-          rest := trees.(i) :: !rest
-    ) in_group;
-
-    !rest @ [Node !group]
-
-  and min_distance_between_subtrees t1 t2 =
-    let min_distance = ref max_int in
-
-    let xs = images_in_subtree t1 in
-    let ys = images_in_subtree t2 in
-
-    List.iter (
-      fun (i, j) ->
-        let d = matrix.(i).(j) in
-        if d < !min_distance then min_distance := d
-    ) (pairs xs ys);
-
-    !min_distance
-  in
-
-  let rec loop trees =
-    match trees with
-    | [] -> assert false
-    | [x] -> x (* finished *)
-    | xs -> loop (combine_closest_subtrees xs)
-  in
-  loop leaves
+let cladogram = construct_cladogram matrix n
 
 let () =
   let format_leaf i = Filename.basename filenames.(i) in

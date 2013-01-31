@@ -20,8 +20,10 @@
 
 type t =
   | Leaf of int                 (** A single disk image (index of). *)
-  | Node of t list              (** An interior node in the tree. *)
+  | Node of t list * int        (** An interior node in the tree. *)
 
 val images_in_subtree : t -> int list
+
+val construct_cladogram : int array array -> int -> t
 
 val format_cladogram : ?format_leaf:(int -> string) -> t -> string list

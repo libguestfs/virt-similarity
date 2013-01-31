@@ -20,7 +20,7 @@ BuildRequires:   /usr/bin/perldoc
 
 
 %description
-Virt-similiarity is a tool for doing cluster analysis of groups of
+Virt-similarity is a tool for doing cluster analysis of groups of
 virtual machines.  It can automatically detect machines which have
 been cloned from each other.  It can produce a "cladogram" showing the
 "family history" of each guest, or you can use it to create the most
