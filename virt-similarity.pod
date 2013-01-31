@@ -1,0 +1,55 @@
+=encoding utf8
+
+=head1 NAME
+
+virt-similarity - Find clusters of similar/cloned virtual machines
+
+=head1 SYNOPSIS
+
+
+
+=head1 DESCRIPTION
+
+Virt-similiarity is a tool for doing cluster analysis of groups of
+virtual machines.  It can automatically detect machines which have
+been cloned from each other.  It can produce a "cladogram" showing the
+"family history" of each guest, or you can use it to create the most
+efficient tree of backing files which will use the least disk space.
+
+
+
+
+
+=head1 FILES
+
+
+
+=head1 ENVIRONMENT VARIABLES
+
+
+
+=head1 SEE ALSO
+
+
+
+=head1 AUTHOR
+
+Richard W.M. Jones L<http://people.redhat.com/~rjones/>
+
+=head1 COPYRIGHT
+
+Copyright (C) 2013 Red Hat Inc.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.

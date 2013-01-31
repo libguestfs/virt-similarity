@@ -1,0 +1,58 @@
+%global opt %(test -x %{_bindir}/ocamlopt && echo 1 || echo 0)
+%global debug_package %{nil}
+
+Name:            @PACKAGE_NAME@
+Version:         @PACKAGE_VERSION@
+Release:         @RPM_RELEASE@%{?dist}
+Summary:         Find clusters of similar/cloned virtual machines
+
+License:         GPLv2+
+URL:             http://people.redhat.com/~rjones/virt-similarity
+Source0:         http://people.redhat.com/~rjones/virt-similarity/files/%{name}-%{version}.tar.gz
+
+BuildRequires:   ocaml >= 3.12.0
+BuildRequires:   ocaml-ocamldoc
+BuildRequires:   ocaml-findlib-devel
+BuildRequires:   ocaml-libguestfs-devel >= 1.14
+
+# For building manual pages.
+BuildRequires:   /usr/bin/perldoc
+
+
+%description
+Virt-similiarity is a tool for doing cluster analysis of groups of
+virtual machines.  It can automatically detect machines which have
+been cloned from each other.  It can produce a "cladogram" showing the
+"family history" of each guest, or you can use it to create the most
+efficient tree of backing files which will use the least disk space.
+
+
+%prep
+%setup -q
+
+
+%build
+%configure
+make %{?_smp_mflags}
+
+
+%check
+make check
+
+
+%install
+make DESTDIR=$RPM_BUILD_ROOT install
+
+# Strip binaries (why doesn't RPM do this?)
+strip --strip-all $RPM_BUILD_ROOT%{_bindir}/virt-similarity
+
+
+%files
+%doc COPYING README
+%{_bindir}/virt-similarity
+%{_mandir}/man1/*.1*
+
+
+%changelog
+* Thu Jan 31 2013 Richard W.M. Jones <rjones@redhat.com> - @PACKAGE_VERSION@-@RPM_RELEASE@
+- Initial release.
